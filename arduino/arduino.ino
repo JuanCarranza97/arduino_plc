@@ -23,7 +23,7 @@ void data_change(void){
       data=0;
       bit_counter=0;
       receiving_data = true;
-    }else{
+    }else if(digitalRead(SDA) == HIGH && receiving_data == true){
       Serial.println("Terminando comunicacion, DATA: "+String(data));
       data_completion(data);
       receiving_data=false;
@@ -33,16 +33,19 @@ void data_change(void){
 }
 
 void clock_falling(void){
-  if(receiving_data){
-    if(bit_counter != 0){
-      bool bit_value=digitalRead(SDA);
-      Serial.println("Adding "+String(bit_value));
-      data+=(bit_value<<(bit_counter-1));
-    }else{
-      Serial.println("DONE");
+  delay(1);
+  if(digitalRead(SCL) == LOW){
+    if(receiving_data){
+      if(bit_counter != 0){
+        bool bit_value=digitalRead(SDA);
+        Serial.println("Adding "+String(bit_value));
+        data+=(bit_value<<(bit_counter-1));
+      }else{
+        Serial.println("DONE");
+      }
+      bit_counter++;
     }
-    bit_counter++;
-  }
+  }  
 }
 
 void data_completion(int x){
